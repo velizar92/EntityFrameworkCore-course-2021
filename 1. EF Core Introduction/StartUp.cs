@@ -14,12 +14,74 @@
 
             SoftUniContext context = new SoftUniContext();
 
-            var employees = GetEmployeesInPeriod(context);
+            var employees = GetEmployee147(context);
             Console.WriteLine(employees);
         }
 
 
-      
+        // Task 9 -> Employee 147 
+        public static string GetEmployee147(SoftUniContext context)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            var employee147Data = context.Employees
+                .Where(e => e.EmployeeId == 147)
+                .Select(e => new
+                {
+                    FirstName = e.FirstName,
+                    LastName = e.LastName,
+                    JobTitle = e.JobTitle,
+                    Projects = e.EmployeesProjects.Select(ep => new
+                    {
+                        ProjectName = ep.Project.Name
+                    })
+                })
+               
+                .FirstOrDefault();
+
+            sb.AppendLine($"{employee147Data.FirstName} {employee147Data.LastName} - {employee147Data.JobTitle}");
+           
+            foreach (var project in employee147Data.Projects.OrderBy(p => p.ProjectName))
+            {
+                sb.AppendLine(project.ProjectName);
+            }
+
+            return sb.ToString().TrimEnd();
+        }
+
+
+
+
+
+        // Task 8 -> Addresses by Town
+        public static string GetAddressesByTown(SoftUniContext context)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            var addresses = context.Addresses
+               .Select(x => new
+               {
+                   AddressText = x.AddressText,
+                   TownName = x.Town.Name,
+                   EmployeeCount = x.Employees.Count
+               })
+               .OrderByDescending(a => a.EmployeeCount)
+               .ThenBy(a => a.TownName)
+               .ThenBy(a => a.AddressText)
+               .Take(10)
+               .ToList();
+
+            foreach (var address in addresses)
+            {
+                sb.AppendLine($"{address.AddressText}, {address.TownName} - {address.EmployeeCount} employees");
+            }
+
+            return sb.ToString().TrimEnd();
+        }
+
+
+
+        // Task 7 -> Employees and Projects
         public static string GetEmployeesInPeriod(SoftUniContext context)
         {
             StringBuilder sb = new StringBuilder();
@@ -42,13 +104,12 @@
               })
               .Take(10);
 
-
             foreach (var employee in employeesInPeriod)
             {
                 sb.AppendLine($"{employee.FirstName} {employee.LastName} - Manager: {employee.ManagerFirstName} {employee.ManagerLastName}");
                 foreach (var project in employee.Projects)
                 {
-                 
+
                     var startDate = project.ProjectStartDate.ToString("M/d/yyyy h:mm:ss tt");
                     var endDate = project.ProjectEndDate.HasValue ? project.ProjectEndDate.Value.ToString("M/d/yyyy h:mm:ss tt") : "not finished";                  //used ternar operator
 
