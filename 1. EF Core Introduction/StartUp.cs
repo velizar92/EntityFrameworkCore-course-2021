@@ -14,8 +14,42 @@
 
             SoftUniContext context = new SoftUniContext();
 
-            var employees = GetDepartmentsWithMoreThan5Employees(context);
+            var employees = GetLatestProjects(context);
             Console.WriteLine(employees);
+        }
+
+
+
+        //Task 11 -> Find Latest 10 Projects
+
+        public static string GetLatestProjects(SoftUniContext context)
+        {
+
+            StringBuilder sb = new StringBuilder();
+            
+            var projects = context.Projects
+                .Select(p => new
+                {
+                    ProjectName = p.Name,
+                    ProjectDescription = p.Description,
+                    ProjectStartDate = p.StartDate
+                })
+                .OrderByDescending(p => p.ProjectStartDate)
+                .Take(10)
+                .ToList();
+
+            foreach (var project in projects.OrderBy(p => p.ProjectName))
+            {
+
+                var formatedStartDate = project.ProjectStartDate.ToString("M/d/yyyy h:mm:ss tt");
+
+                sb.AppendLine(project.ProjectName);
+                sb.AppendLine(project.ProjectDescription);
+                sb.AppendLine(formatedStartDate);
+            }
+
+            return sb.ToString().TrimEnd();
+
         }
 
 
@@ -40,10 +74,10 @@
                 })
                 .ToList();
 
-            foreach (var department in departments) 
+            foreach (var department in departments)
             {
                 sb.AppendLine($"{department.DepartmentName} - {department.ManagerFirstName} {department.ManagerLastName}");
-                foreach(var employee in department.Employees
+                foreach (var employee in department.Employees
                     .OrderBy(e => e.FirstName)
                     .ThenBy(e => e.LastName))
                 {
