@@ -14,9 +14,48 @@
 
             SoftUniContext context = new SoftUniContext();
 
-            var employees = GetEmployee147(context);
+            var employees = GetDepartmentsWithMoreThan5Employees(context);
             Console.WriteLine(employees);
         }
+
+
+        //Task 10 -> Departments with More Than 5 Employees
+        public static string GetDepartmentsWithMoreThan5Employees(SoftUniContext context)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            var departments = context.Departments
+                .Where(d => d.Employees.Count > 5)
+                .Select(d => new
+                {
+                    DepartmentName = d.Name,
+                    ManagerFirstName = d.Manager.FirstName,
+                    ManagerLastName = d.Manager.LastName,
+                    Employees = d.Employees.Select(e => new
+                    {
+                        FirstName = e.FirstName,
+                        LastName = e.LastName,
+                        JobTitle = e.JobTitle
+                    })
+                })
+                .ToList();
+
+            foreach (var department in departments) 
+            {
+                sb.AppendLine($"{department.DepartmentName} - {department.ManagerFirstName} {department.ManagerLastName}");
+                foreach(var employee in department.Employees
+                    .OrderBy(e => e.FirstName)
+                    .ThenBy(e => e.LastName))
+                {
+                    sb.AppendLine($"{employee.FirstName} {employee.LastName} - {employee.JobTitle}");
+                }
+            }
+
+            return sb.ToString().TrimEnd();
+        }
+
+
+
 
 
         // Task 9 -> Employee 147 
@@ -36,11 +75,11 @@
                         ProjectName = ep.Project.Name
                     })
                 })
-               
+
                 .FirstOrDefault();
 
             sb.AppendLine($"{employee147Data.FirstName} {employee147Data.LastName} - {employee147Data.JobTitle}");
-           
+
             foreach (var project in employee147Data.Projects.OrderBy(p => p.ProjectName))
             {
                 sb.AppendLine(project.ProjectName);
