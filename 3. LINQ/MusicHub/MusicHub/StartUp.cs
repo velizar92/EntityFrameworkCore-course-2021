@@ -16,15 +16,18 @@
 
             DbInitializer.ResetDatabase(context);
 
-            string result = ExportAlbumsInfo(context, 9);
-            Console.WriteLine(result);
+            string result1 = ExportAlbumsInfo(context, 9);
+            Console.WriteLine(result1);
+
+            string result2 = ExportSongsAboveDuration(context, 4);
+            Console.WriteLine(result2);
         }
 
         public static string ExportAlbumsInfo(MusicHubDbContext context, int producerId)
         {
 
             StringBuilder output = new StringBuilder();
-        
+
 
             var albums = context.Albums
                  .ToList()
@@ -46,7 +49,7 @@
                     .ThenBy(w => w.WriterName)
                     .ToList(),
                      TotalAlbumPrice = a.Price.ToString("f2"),
-                 })                               
+                 })
                  .ToList();
 
             foreach (var album in albums)
@@ -71,9 +74,43 @@
             return output.ToString().TrimEnd();
         }
 
+
+
         public static string ExportSongsAboveDuration(MusicHubDbContext context, int duration)
         {
-            throw new NotImplementedException();
+
+            StringBuilder output = new StringBuilder();
+
+            var songs = context.Songs
+                .ToList()
+                .Where(s => s.Duration.TotalSeconds > duration)
+                .Select(s => new
+                {
+                    SongName = s.Name,
+                    PerformerFullName = s.SongPerformers.Select(s => $"{s.Performer.FirstName} {s.Performer.LastName}").FirstOrDefault(),
+                    WriterName = s.Writer.Name,
+                    AlbumProducer = s.Album.Producer.Name,
+                    Duration = s.Duration.ToString("c", CultureInfo.InvariantCulture)
+                })
+                .OrderBy(s => s.SongName)
+                .ThenBy(s => s.WriterName)
+                .ThenBy(s => s.PerformerFullName)
+                .ToList();
+
+            int songCount = 1;
+            foreach (var song in songs)
+            {
+                output
+                    .AppendLine($"-Song #{songCount++}")
+                    .AppendLine($"---SongName: {song.SongName}")
+                    .AppendLine($"---Writer: {song.WriterName}")
+                    .AppendLine($"---Performer: {song.PerformerFullName}")
+                    .AppendLine($"---AlbumProducer: {song.AlbumProducer}")
+                    .AppendLine($"---Duration: {song.Duration}");
+            }
+
+
+            return output.ToString().Trim();
         }
     }
 }
