@@ -39,10 +39,40 @@ namespace ProductShop
             //Console.WriteLine(categoryResult);
             //Console.WriteLine(categoryProductResult);
 
-            var result = GetProductsInRange(productShopContext);
+            var result = GetSoldProducts(productShopContext);
 
             Console.WriteLine(result);
         }
+
+
+
+        public static string GetSoldProducts(ProductShopContext context)
+        {
+            var users = context.Users
+                .Where(u => u.ProductsSold.Any(p => p.BuyerId != null))
+                .Select(u => new
+                {
+                    firstName = u.FirstName,
+                    lastName = u.LastName,
+                    soldProducts = u.ProductsSold.Where(p => p.BuyerId != null).Select(p => new
+                    {
+                        name = p.Name,
+                        price = p.Price,
+                        buyerFirstName = p.Buyer.FirstName,
+                        buyerLastName = p.Buyer.LastName
+                    })
+                })
+                .OrderBy(u => u.lastName)
+                .ThenBy(u => u.firstName)
+                .ToList();
+
+            var result = JsonConvert.SerializeObject(users, Formatting.Indented);
+
+            return result;
+        }
+
+
+
 
         public static string GetProductsInRange(ProductShopContext context)
         {
