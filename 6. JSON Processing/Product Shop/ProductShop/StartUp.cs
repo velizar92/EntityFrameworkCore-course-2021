@@ -18,28 +18,50 @@ namespace ProductShop
         {
 
             var productShopContext = new ProductShopContext();
-            productShopContext.Database.EnsureDeleted();
-            productShopContext.Database.EnsureCreated();
+            //productShopContext.Database.EnsureDeleted();
+            //productShopContext.Database.EnsureCreated();
 
 
+            //string inputJsonUsers = File.ReadAllText("../../../Datasets/users.json");
+            //var userResult = ImportUsers(productShopContext, inputJsonUsers);
 
-            string inputJsonUsers = File.ReadAllText("../../../Datasets/users.json");
-            var userResult = ImportUsers(productShopContext, inputJsonUsers);
+            //string inputJson = File.ReadAllText("../../../Datasets/products.json");
+            //var productResult = ImportProducts(productShopContext, inputJson);
 
-            string inputJson = File.ReadAllText("../../../Datasets/products.json");
-            var productResult = ImportProducts(productShopContext, inputJson);
+            //string inputJsonCategories = File.ReadAllText("../../../Datasets/categories.json");
+            //var categoryResult = ImportCategories(productShopContext, inputJsonCategories);
 
-            string inputJsonCategories = File.ReadAllText("../../../Datasets/categories.json");
-            var categoryResult = ImportCategories(productShopContext, inputJsonCategories);
+            //string inputJsonCategoriesProducts = File.ReadAllText("../../../Datasets/categories-products.json");
+            //var categoryProductResult = ImportCategories(productShopContext, inputJsonCategoriesProducts);
 
-            string inputJsonCategoriesProducts = File.ReadAllText("../../../Datasets/categories-products.json");
-            var categoryProductResult = ImportCategories(productShopContext, inputJsonCategoriesProducts);
+            //Console.WriteLine(userResult);
+            //Console.WriteLine(productResult);
+            //Console.WriteLine(categoryResult);
+            //Console.WriteLine(categoryProductResult);
 
-            Console.WriteLine(userResult);
-            Console.WriteLine(productResult);
-            Console.WriteLine(categoryResult);
-            Console.WriteLine(categoryProductResult);
+            var result = GetProductsInRange(productShopContext);
+
+            Console.WriteLine(result);
         }
+
+        public static string GetProductsInRange(ProductShopContext context)
+        {
+            var products = context.Products
+                .Where(p => p.Price >= 500 && p.Price <= 1000)
+                .Select(p => new
+                {
+                    name = p.Name,
+                    price = p.Price,
+                    seller = p.Seller.FirstName + " " + p.Seller.LastName
+                })
+                .OrderBy(p => p.price)
+                .ToList();
+
+            var result = JsonConvert.SerializeObject(products);
+
+            return result;
+        }
+
 
 
 
@@ -63,12 +85,12 @@ namespace ProductShop
         public static string ImportCategories(ProductShopContext context, string inputJson)
         {
             InitializeAutomapper();
-           
+
             IEnumerable<CategoryInputModel> dtoCategories = JsonConvert
                 .DeserializeObject<IEnumerable<CategoryInputModel>>(inputJson)
                 .Where(x => x.Name != null)
                 .ToList();
-                
+
             var categories = mapper.Map<IEnumerable<Category>>(dtoCategories);
 
             context.Categories.AddRange(categories);
