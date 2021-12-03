@@ -3,24 +3,28 @@
     "Id": 3,
     "Name": "Binni Cornhill",
     "CellNumber": 503,
-    "Officers": []
+    "Officers": [],
+    "TotalOfficerSalary": "0.00"
   },
   {
     "Id": 5,
     "Name": "Ellette Lante",
     "CellNumber": 403,
-    "Officers": []
+    "Officers": [],
+    "TotalOfficerSalary": "0.00"
   },
   {
     "Id": 1,
     "Name": "Isis Gasticke",
     "CellNumber": 604,
-    "Officers": []
+    "Officers": [],
+    "TotalOfficerSalary": "0.00"
   },
   {
     "Id": 7,
     "Name": "Rosanna Lissaman",
     "CellNumber": 103,
-    "Officers": []
+    "Officers": [],
+    "TotalOfficerSalary": "0.00"
   }
 ]
